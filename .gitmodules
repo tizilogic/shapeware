@@ -1,0 +1,3 @@
+[submodule "krink"]
+	path = krink
+	url = https://github.com/tizilogic/krink.git
