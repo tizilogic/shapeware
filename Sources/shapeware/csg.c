@@ -92,20 +92,20 @@ static float sdf_smooth_intersection(float a, float b, float k) {
 	return smax_cubic(a, b, k);
 }
 
-float sw_csw_evaluate(sw_type_t t, float a, float b, void *data) {
+float sw_csg_evaluate(sw_type_t t, float a, float b, void *data) {
 	switch (t) {
-	case SW_CSW_UNION:
+	case SW_CSG_UNION:
 		return sdf_union(a, b);
-	case SW_CSW_SUBTRACTION:
+	case SW_CSG_SUBTRACTION:
 		return sdf_subtraction(a, b);
-	case SW_CSW_INTERSECTION:
+	case SW_CSG_INTERSECTION:
 		return sdf_intersection(a, b);
-	case SW_CSW_SMOOTH_UNION:
-		return sdf_smooth_union(a, b, ((sw_csw_smooth_t *)data)->k);
-	case SW_CSW_SMOOTH_SUBTRACTION:
-		return sdf_smooth_subtraction(a, b, ((sw_csw_smooth_subtraction_t *)data)->k);
-	case SW_CSW_SMOOTH_INTERSECTION:
-		return sdf_smooth_intersection(a, b, ((sw_csw_smooth_t *)data)->k);
+	case SW_CSG_SMOOTH_UNION:
+		return sdf_smooth_union(a, b, ((sw_csg_smooth_t *)data)->k);
+	case SW_CSG_SMOOTH_SUBTRACTION:
+		return sdf_smooth_subtraction(a, b, ((sw_csg_smooth_subtraction_t *)data)->k);
+	case SW_CSG_SMOOTH_INTERSECTION:
+		return sdf_smooth_intersection(a, b, ((sw_csg_smooth_t *)data)->k);
 
 	default:
 		kinc_log(KINC_LOG_LEVEL_WARNING, "Unknown CSG operation of type %d", t);
@@ -114,20 +114,20 @@ float sw_csw_evaluate(sw_type_t t, float a, float b, void *data) {
 	return INFINITY;
 }
 
-kr_vec4_t sw_csw_evaluate_color(sw_type_t t, kr_vec4_t a, kr_vec4_t b, void *data) {
+kr_vec4_t sw_csg_evaluate_color(sw_type_t t, kr_vec4_t a, kr_vec4_t b, void *data) {
 	switch (t) {
-	case SW_CSW_UNION:
+	case SW_CSG_UNION:
 		return sdf_union_color(a, b);
-	case SW_CSW_SUBTRACTION:
+	case SW_CSG_SUBTRACTION:
 		return sdf_subtraction_color(a, b);
-	case SW_CSW_INTERSECTION:
+	case SW_CSG_INTERSECTION:
 		return sdf_intersection_color(a, b);
-	case SW_CSW_SMOOTH_UNION:
-		return sdf_smooth_union_color(a, b, ((sw_csw_smooth_t *)data)->k);
-	case SW_CSW_SMOOTH_SUBTRACTION:
-		return sdf_smooth_subtraction_color(a, b, ((sw_csw_smooth_subtraction_t *)data)->k);
-	case SW_CSW_SMOOTH_INTERSECTION:
-		return sdf_smooth_intersection_color(a, b, ((sw_csw_smooth_t *)data)->k);
+	case SW_CSG_SMOOTH_UNION:
+		return sdf_smooth_union_color(a, b, ((sw_csg_smooth_t *)data)->k);
+	case SW_CSG_SMOOTH_SUBTRACTION:
+		return sdf_smooth_subtraction_color(a, b, ((sw_csg_smooth_subtraction_t *)data)->k);
+	case SW_CSG_SMOOTH_INTERSECTION:
+		return sdf_smooth_intersection_color(a, b, ((sw_csg_smooth_t *)data)->k);
 
 	default:
 		kinc_log(KINC_LOG_LEVEL_WARNING, "Unknown CSG operation of type %d", t);
