@@ -138,7 +138,7 @@ static kr_vec4_t sw_sdf_compute_stack_frame_pop(sw_stack_frame_t *frame) {
 	} break;
 	case SW_NODE_TYPE_CSG: {
 		tmp_dist =
-		    sw_csw_evaluate_color(frame->node_type, frame->dist_a, frame->dist_b, frame->data);
+		    sw_csg_evaluate_color(frame->node_type, frame->dist_a, frame->dist_b, frame->data);
 	} break;
 	case SW_NODE_TYPE_OP: {
 		tmp_dist.w =
@@ -178,23 +178,23 @@ kr_vec4_t sw_sdf_compute_color(sw_sdf_t *sdf, kr_vec3_t pos) {
 			}
 			else {
 				sw_type_t t = stack[stack_top - 1].node_type;
-				if (t == SW_CSW_UNION || t == SW_CSW_INTERSECTION || t == SW_CSW_SMOOTH_UNION ||
-				    t == SW_CSW_SMOOTH_INTERSECTION) {
+				if (t == SW_CSG_UNION || t == SW_CSG_INTERSECTION || t == SW_CSG_SMOOTH_UNION ||
+				    t == SW_CSG_SMOOTH_INTERSECTION) {
 					if (isinf(stack[stack_top - 1].dist_a.w))
 						stack[stack_top - 1].dist_a = tmp_dist;
 					else
 						stack[stack_top - 1].dist_b = tmp_dist;
 				}
-				else if (t == SW_CSW_SUBTRACTION) {
-					sw_csw_subtraction_t *csg = (sw_csw_subtraction_t *)stack[stack_top - 1].data;
+				else if (t == SW_CSG_SUBTRACTION) {
+					sw_csg_subtraction_t *csg = (sw_csg_subtraction_t *)stack[stack_top - 1].data;
 					if (stack[stack_top].node_id == csg->subtractor_id)
 						stack[stack_top - 1].dist_a = tmp_dist;
 					else
 						stack[stack_top - 1].dist_b = tmp_dist;
 				}
-				else if (t == SW_CSW_SMOOTH_SUBTRACTION) {
-					sw_csw_smooth_subtraction_t *csg =
-					    (sw_csw_smooth_subtraction_t *)stack[stack_top - 1].data;
+				else if (t == SW_CSG_SMOOTH_SUBTRACTION) {
+					sw_csg_smooth_subtraction_t *csg =
+					    (sw_csg_smooth_subtraction_t *)stack[stack_top - 1].data;
 					if (stack[stack_top].node_id == csg->subtractor_id)
 						stack[stack_top - 1].dist_a = tmp_dist;
 					else

@@ -2,8 +2,8 @@
 
 #define SW_SHAPES_START 1000
 #define SW_SHAPES_MAX 1999
-#define SW_CSW_START 2000
-#define SW_CSW_MAX 2999
+#define SW_CSG_START 2000
+#define SW_CSG_MAX 2999
 #define SW_TRANSFOM_START 99000 // Range from where not to show names
 #define SW_TRANSFOM_MAX 99999
 #define SW_DUMMIES_START 100000
@@ -27,7 +27,7 @@ typedef enum sw_node_type_group {
 
 static sw_node_type_group_t sw_node_type_group_get(int t) {
 	if (t >= SW_SHAPES_START && t <= SW_SHAPES_MAX) return SW_NODE_TYPE_SHAPE;
-	if (t >= SW_CSW_START && t <= SW_CSW_MAX) return SW_NODE_TYPE_CSG;
+	if (t >= SW_CSG_START && t <= SW_CSG_MAX) return SW_NODE_TYPE_CSG;
 	if (t >= SW_TRANSFOM_START && t <= SW_TRANSFOM_MAX) return SW_NODE_TYPE_TRANSFORM;
 	if (t >= SW_DUMMIES_START && t <= SW_DUMMIES_MAX) return SW_NODE_TYPE_DUMMY;
 	if (t >= SW_OPS_START && t <= SW_OPS_MAX) return SW_NODE_TYPE_OP;
