@@ -1,3 +1,6 @@
 [submodule "krink"]
 	path = krink
 	url = https://github.com/tizilogic/krink.git
+[submodule "ext/sht"]
+	path = ext/sht
+	url = https://github.com/tizilogic/sht.git
