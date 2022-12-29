@@ -1,19 +1,20 @@
 #include "csg.h"
 #include <kinc/log.h>
+#include <assert.h>
 #include <math.h>
 
 static kr_vec2_t smin_cubic2(float a, float b, float k) {
-	float h = fmax(k - fabs(a - b), 0.0f) / k;
+	float h = fmaxf(k - fabsf(a - b), 0.0f) / k;
 	float m = h * h * h * 0.5f;
 	float s = m * k * (1.0f / 3.0f);
-	return (a < b) ? (kr_vec2_t){a - s, m} : (kr_vec2_t){b - s, 1.0 - m};
+	return (a < b) ? (kr_vec2_t){a - s, m} : (kr_vec2_t){b - s, 1.0f - m};
 }
 
 static kr_vec2_t smax_cubic2(float a, float b, float k) {
-	float h = fmax(k - fabs(a - b), 0.0f) / k;
+	float h = fmaxf(k - fabsf(a - b), 0.0f) / k;
 	float m = h * h * h * 0.5f;
 	float s = m * k * (1.0f / 3.0f);
-	return (a > b) ? (kr_vec2_t){a - s, m} : (kr_vec2_t){b - s, 1.0 - m};
+	return (a > b) ? (kr_vec2_t){a - s, m} : (kr_vec2_t){b - s, 1.0f - m};
 }
 
 static kr_vec4_t sdf_union_color(kr_vec4_t a, kr_vec4_t b) {
@@ -29,7 +30,7 @@ static kr_vec4_t sdf_intersection_color(kr_vec4_t a, kr_vec4_t b) {
 }
 
 static kr_vec3_t mix(kr_vec3_t a, kr_vec3_t b, float f) {
-	f = (f < 0.0f) ? 0.0f : ((f > 1.0f) ? 1.0f : f);
+	assert(f >= 0.0f && f <= 1.0f);
 	float finv = f;
 	f = 1.0f - f;
 	return (kr_vec3_t){
