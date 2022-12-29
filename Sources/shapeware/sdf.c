@@ -164,6 +164,7 @@ kr_vec4_t sw_sdf_compute_color(sw_sdf_t *sdf, kr_vec3_t pos) {
 		int rotation = sw_list_int_get(sdf->nodes, i * 2 + 1);
 		pos = sw_sdf_transform(sdf, pos, translation, rotation);
 	}
+	kr_vec3_t base_pos = pos;
 	int node_top = sdf->empty_count * 2;
 	kr_vec4_t res = (kr_vec4_t){.x = 0.0f, .y = 0.0f, .z = 0.0f, .w = INFINITY};
 
@@ -171,7 +172,10 @@ kr_vec4_t sw_sdf_compute_color(sw_sdf_t *sdf, kr_vec3_t pos) {
 	for (int i = 0; i < instruction_count; ++i) {
 		if (sw_list_int_get(sdf->stack_direction, i) == -1) { // POP
 			kr_vec4_t tmp_dist = sw_sdf_compute_stack_frame_pop(&stack[stack_top - 1]);
-			pos = stack[stack_top - 1].pos;
+			if (stack_top > 1)
+				pos = stack[stack_top - 2].pos;
+			else
+				pos = base_pos;
 			--stack_top;
 			if (stack_top == 0) {
 				res = (res.w < tmp_dist.w) ? res : tmp_dist;
