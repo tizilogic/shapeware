@@ -1,6 +1,7 @@
 #include <kinc/log.h>
 #include <kinc/system.h>
 #include <krink/math/vector.h>
+#include <krink/memory.h>
 #include <krink/system.h>
 #include <shapeware/csg.h>
 #include <shapeware/graph.h>
@@ -46,13 +47,21 @@ int kickstart(int argc, char **argv) {
 	sw_graph_set_parent(&g, s1_id, smunion_id);
 	sw_graph_set_parent(&g, s2_id, smunion_id);
 
+	kinc_log(KINC_LOG_LEVEL_INFO, "%d bytes in %d allocations", kr_allocation_size(), kr_allocation_count());
+
 	sw_sdf_t *sdf = sw_sdf_generate(&g, -1);
-	kr_vec4_t d = sw_sdf_compute_color(sdf, (kr_vec3_t){-1.25f, 0.0f, 0.0f});
+	kr_vec4_t d;
+	sw_sdf_stack_frame_t *stack = sw_sdf_stack_init(sdf);
+	d = sw_sdf_compute_color(sdf, (kr_vec3_t){-1.25f, 0.0f, 0.0f}, stack);
 	kinc_log(KINC_LOG_LEVEL_INFO, "R %0.3f G %0.3f B %0.3f Distance %0.3f", d.x, d.y, d.z, d.w);
-	d = sw_sdf_compute_color(sdf, (kr_vec3_t){1.25f, 0.0f, 0.0f});
+	d = sw_sdf_compute_color(sdf, (kr_vec3_t){1.25f, 0.0f, 0.0f}, stack);
 	kinc_log(KINC_LOG_LEVEL_INFO, "R %0.3f G %0.3f B %0.3f Distance %0.3f", d.x, d.y, d.z, d.w);
-	d = sw_sdf_compute_color(sdf, (kr_vec3_t){2.25f, 0.0f, 0.0f});
+	d = sw_sdf_compute_color(sdf, (kr_vec3_t){2.25f, 0.0f, 0.0f}, NULL);
 	kinc_log(KINC_LOG_LEVEL_INFO, "R %0.3f G %0.3f B %0.3f Distance %0.3f", d.x, d.y, d.z, d.w);
+
+	sw_sdf_stack_destroy(stack);
+	sw_sdf_destroy(sdf);
+
 	kr_destroy();
 	return 0;
 }

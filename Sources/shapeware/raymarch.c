@@ -14,13 +14,14 @@ kr_vec3_t sw_raymarch_ray_direction(kr_vec3_t origin, kr_vec3_t look_at, kr_vec2
 	                         kr_vec3_normalized((kr_vec3_t){frag_pos.x, frag_pos.y, focal_length}));
 }
 
-kr_vec3_t sw_raymarch_surface_pos(sw_sdf_t *sdf, kr_vec3_t origin, kr_vec3_t direction,
-                                  int max_steps, float surf_dist, float max_dist, bool *hit) {
+kr_vec3_t sw_raymarch_surface_pos(sw_sdf_t *sdf, sw_sdf_stack_frame_t *stack, kr_vec3_t origin,
+                                  kr_vec3_t direction, int max_steps, float surf_dist,
+                                  float max_dist, bool *hit) {
 	float offset = 0.0f;
 	*hit = true;
 	for (int i = 0; i < max_steps; i++) {
 		kr_vec3_t p = kr_vec3_addv(origin, kr_vec3_mult(direction, offset));
-		float dist = sw_sdf_compute(sdf, p);
+		float dist = sw_sdf_compute(sdf, p, stack);
 		offset += dist;
 		if (fabsf(dist) < surf_dist) return p;
 		if (offset > max_dist) break;
@@ -29,7 +30,7 @@ kr_vec3_t sw_raymarch_surface_pos(sw_sdf_t *sdf, kr_vec3_t origin, kr_vec3_t dir
 	return (kr_vec3_t){0.0f};
 }
 
-kr_vec3_t sw_raymarch_surface_normal(sw_sdf_t *sdf, kr_vec3_t pos) {
+kr_vec3_t sw_raymarch_surface_normal(sw_sdf_t *sdf, sw_sdf_stack_frame_t *stack, kr_vec3_t pos) {
 	const float h = 0.001f;
 	const kr_vec3_t xyy = (kr_vec3_t){.x = 1.0f, .y = -1.0f, .z = -1.0f};
 	const kr_vec3_t yyx = (kr_vec3_t){.x = -1.0f, .y = -1.0f, .z = 1.0f};
@@ -39,8 +40,10 @@ kr_vec3_t sw_raymarch_surface_normal(sw_sdf_t *sdf, kr_vec3_t pos) {
 	return kr_vec3_normalized(kr_vec3_addv(
 	    kr_vec3_addv(
 	        kr_vec3_addv(
-	            kr_vec3_mult(xyy, sw_sdf_compute(sdf, kr_vec3_addv(pos, kr_vec3_mult(xyy, h)))),
-	            kr_vec3_mult(yyx, sw_sdf_compute(sdf, kr_vec3_addv(pos, kr_vec3_mult(yyx, h))))),
-	        kr_vec3_mult(yxy, sw_sdf_compute(sdf, kr_vec3_addv(pos, kr_vec3_mult(yxy, h))))),
-	    kr_vec3_mult(xxx, sw_sdf_compute(sdf, kr_vec3_addv(pos, kr_vec3_mult(xxx, h))))));
+	            kr_vec3_mult(xyy,
+	                         sw_sdf_compute(sdf, kr_vec3_addv(pos, kr_vec3_mult(xyy, h)), stack)),
+	            kr_vec3_mult(yyx,
+	                         sw_sdf_compute(sdf, kr_vec3_addv(pos, kr_vec3_mult(yyx, h)), stack))),
+	        kr_vec3_mult(yxy, sw_sdf_compute(sdf, kr_vec3_addv(pos, kr_vec3_mult(yxy, h)), stack))),
+	    kr_vec3_mult(xxx, sw_sdf_compute(sdf, kr_vec3_addv(pos, kr_vec3_mult(xxx, h)), stack))));
 }

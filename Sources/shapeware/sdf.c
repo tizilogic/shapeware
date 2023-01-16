@@ -13,14 +13,14 @@
 #include <math.h>
 #include <util/list.h>
 
-typedef struct sw_stack_frame {
+typedef struct sw_sdf_stack_frame {
 	int node_id;
 	kr_vec4_t dist_a;
 	kr_vec4_t dist_b;
 	sw_type_t node_type;
 	void *data;
 	kr_vec3_t pos;
-} sw_stack_frame_t;
+} sw_sdf_stack_frame_t;
 
 typedef struct sw_sdf {
 	sw_graph_t *g;
@@ -62,7 +62,8 @@ static void sw_sdf_populate_empty_to_root(sw_sdf_t *sdf, sw_graph_t *g, int star
 	sw_list_int_destroy(path);
 }
 
-static void sw_sdf_traverse(sw_sdf_t *sdf, sw_graph_t *g, int parent) {
+static void sw_sdf_traverse(sw_sdf_t *sdf, sw_graph_t *g, int parent, int depth) {
+	sdf->max_stack_depth = (sdf->max_stack_depth < depth) ? depth : sdf->max_stack_depth;
 	sw_node_t *n = NULL;
 	sw_iter_t it;
 	sw_foreach(n, g, &it, parent) {
@@ -73,7 +74,7 @@ static void sw_sdf_traverse(sw_sdf_t *sdf, sw_graph_t *g, int parent) {
 		sw_list_int_push(sdf->nodes, sw_sdf_find_of_type(g, node_id, SW_TRANSFORM_TRANSLATION));
 		sw_list_int_push(sdf->nodes, sw_sdf_find_of_type(g, node_id, SW_TRANSFORM_ROTATION));
 		sw_list_int_push(sdf->stack_direction, 1);
-		sw_sdf_traverse(sdf, g, node_id);
+		sw_sdf_traverse(sdf, g, node_id, depth + 1);
 		sw_list_int_push(sdf->stack_direction, -1);
 	}
 }
@@ -86,7 +87,7 @@ sw_sdf_t *sw_sdf_generate(sw_graph_t *g, int start_node) {
 	sdf->stack_direction = sw_list_int_init(g->size * 2);
 	sdf->max_stack_depth = -1;
 	sw_sdf_populate_empty_to_root(sdf, g, start_node);
-	sw_sdf_traverse(sdf, g, start_node);
+	sw_sdf_traverse(sdf, g, start_node, 0);
 	return sdf;
 }
 
@@ -95,6 +96,19 @@ void sw_sdf_destroy(sw_sdf_t *sdf) {
 	if (sdf->nodes) sw_list_int_destroy(sdf->nodes);
 	if (sdf->stack_direction) sw_list_int_destroy(sdf->stack_direction);
 	kr_free(sdf);
+}
+
+sw_sdf_stack_frame_t *sw_sdf_stack_init(sw_sdf_t *sdf) {
+	// TODO: Verify that the additional frame is needed!
+	sw_sdf_stack_frame_t *stack = (sw_sdf_stack_frame_t *)kr_malloc((sdf->max_stack_depth + 1) *
+	                                                                sizeof(sw_sdf_stack_frame_t));
+	assert(stack != NULL);
+	return stack;
+}
+
+void sw_sdf_stack_destroy(sw_sdf_stack_frame_t *stack) {
+	assert(stack != NULL);
+	kr_free(stack);
 }
 
 static kr_vec3_t sw_sdf_transform(sw_sdf_t *sdf, kr_vec3_t pos, int translation, int rotation) {
@@ -122,13 +136,13 @@ static kr_vec3_t sw_sdf_transform(sw_sdf_t *sdf, kr_vec3_t pos, int translation,
 	return pos;
 }
 
-static void sw_sdf_compute_stack_frame_push(sw_stack_frame_t *frame) {
+static void sw_sdf_compute_stack_frame_push(sw_sdf_stack_frame_t *frame) {
 	if (sw_node_type_group_get(frame->node_type) == SW_NODE_TYPE_OP) {
 		frame->pos = sw_ops_evaluate_pos(frame->node_type, frame->pos, frame->data);
 	}
 }
 
-static kr_vec4_t sw_sdf_compute_stack_frame_pop(sw_stack_frame_t *frame) {
+static kr_vec4_t sw_sdf_compute_stack_frame_pop(sw_sdf_stack_frame_t *frame) {
 	kr_vec4_t tmp_dist = frame->dist_a;
 	tmp_dist.w = INFINITY;
 	sw_node_type_group_t g = sw_node_type_group_get(frame->node_type);
@@ -154,10 +168,16 @@ static kr_vec4_t sw_sdf_compute_stack_frame_pop(sw_stack_frame_t *frame) {
 	return tmp_dist;
 }
 
-kr_vec4_t sw_sdf_compute_color(sw_sdf_t *sdf, kr_vec3_t pos) {
-	int stack_size = sdf->max_stack_depth > 0 ? sdf->max_stack_depth : SW_SDF_STACK_SIZE_START;
-	sw_stack_frame_t *stack = kr_malloc(stack_size * sizeof(sw_stack_frame_t));
-	assert(stack);
+kr_vec4_t sw_sdf_compute_color(sw_sdf_t *sdf, kr_vec3_t pos, sw_sdf_stack_frame_t *stack) {
+	sw_sdf_stack_frame_t *frames = NULL;
+	if (stack == NULL) {
+		int stack_size = sdf->max_stack_depth + 1;
+		frames = (sw_sdf_stack_frame_t *)kr_malloc(stack_size * sizeof(sw_sdf_stack_frame_t));
+		assert(frames);
+	}
+	else
+		frames = stack;
+
 	int stack_top = 0;
 	for (int i = 0; i < sdf->empty_count; ++i) {
 		int translation = sw_list_int_get(sdf->nodes, i * 2);
@@ -171,9 +191,9 @@ kr_vec4_t sw_sdf_compute_color(sw_sdf_t *sdf, kr_vec3_t pos) {
 	int instruction_count = sw_list_int_len(sdf->stack_direction);
 	for (int i = 0; i < instruction_count; ++i) {
 		if (sw_list_int_get(sdf->stack_direction, i) == -1) { // POP
-			kr_vec4_t tmp_dist = sw_sdf_compute_stack_frame_pop(&stack[stack_top - 1]);
+			kr_vec4_t tmp_dist = sw_sdf_compute_stack_frame_pop(&frames[stack_top - 1]);
 			if (stack_top > 1)
-				pos = stack[stack_top - 2].pos;
+				pos = frames[stack_top - 2].pos;
 			else
 				pos = base_pos;
 			--stack_top;
@@ -181,63 +201,56 @@ kr_vec4_t sw_sdf_compute_color(sw_sdf_t *sdf, kr_vec3_t pos) {
 				res = (res.w < tmp_dist.w) ? res : tmp_dist;
 			}
 			else {
-				sw_type_t t = stack[stack_top - 1].node_type;
+				sw_type_t t = frames[stack_top - 1].node_type;
 				if (t == SW_CSG_UNION || t == SW_CSG_INTERSECTION || t == SW_CSG_SMOOTH_UNION ||
 				    t == SW_CSG_SMOOTH_INTERSECTION) {
-					if (isinf(stack[stack_top - 1].dist_a.w))
-						stack[stack_top - 1].dist_a = tmp_dist;
+					if (isinf(frames[stack_top - 1].dist_a.w))
+						frames[stack_top - 1].dist_a = tmp_dist;
 					else
-						stack[stack_top - 1].dist_b = tmp_dist;
+						frames[stack_top - 1].dist_b = tmp_dist;
 				}
 				else if (t == SW_CSG_SUBTRACTION) {
-					sw_csg_subtraction_t *csg = (sw_csg_subtraction_t *)stack[stack_top - 1].data;
-					if (stack[stack_top].node_id == csg->subtractor_id)
-						stack[stack_top - 1].dist_a = tmp_dist;
+					sw_csg_subtraction_t *csg = (sw_csg_subtraction_t *)frames[stack_top - 1].data;
+					if (frames[stack_top].node_id == csg->subtractor_id)
+						frames[stack_top - 1].dist_a = tmp_dist;
 					else
-						stack[stack_top - 1].dist_b = tmp_dist;
+						frames[stack_top - 1].dist_b = tmp_dist;
 				}
 				else if (t == SW_CSG_SMOOTH_SUBTRACTION) {
 					sw_csg_smooth_subtraction_t *csg =
-					    (sw_csg_smooth_subtraction_t *)stack[stack_top - 1].data;
-					if (stack[stack_top].node_id == csg->subtractor_id)
-						stack[stack_top - 1].dist_a = tmp_dist;
+					    (sw_csg_smooth_subtraction_t *)frames[stack_top - 1].data;
+					if (frames[stack_top].node_id == csg->subtractor_id)
+						frames[stack_top - 1].dist_a = tmp_dist;
 					else
-						stack[stack_top - 1].dist_b = tmp_dist;
+						frames[stack_top - 1].dist_b = tmp_dist;
 				}
 				else {
-					stack[stack_top - 1].dist_a = tmp_dist;
+					frames[stack_top - 1].dist_a = tmp_dist;
 				}
 			}
 			continue;
 		}
 
 		// PUSH
-		if (stack_top + 1 >= stack_size) {
-			stack =
-			    (sw_stack_frame_t *)kr_realloc(stack, 2 * stack_size * sizeof(sw_stack_frame_t));
-			assert(stack);
-			stack_size *= 2;
-		}
 		int node_id = sw_list_int_get(sdf->nodes, node_top++);
 		int translation = sw_list_int_get(sdf->nodes, node_top++);
 		int rotation = sw_list_int_get(sdf->nodes, node_top++);
 		sw_node_t *n = sw_graph_get_node(sdf->g, node_id);
 		pos = sw_sdf_transform(sdf, pos, translation, rotation);
-		stack[stack_top].node_id = node_id;
-		stack[stack_top].pos = pos;
-		stack[stack_top].node_type = n->type;
-		stack[stack_top].data = n->size > 0 ? sw_graph_get_data(sdf->g, n) : NULL;
-		stack[stack_top].dist_a = (kr_vec4_t){0.0f, 0.0f, 0.0f, INFINITY};
-		stack[stack_top++].dist_b = (kr_vec4_t){0.0f, 0.0f, 0.0f, INFINITY};
-		sw_sdf_compute_stack_frame_push(&stack[stack_top - 1]);
-		pos = stack[stack_top - 1].pos;
-		sdf->max_stack_depth = kinc_maxi(sdf->max_stack_depth, stack_top + 1);
+		frames[stack_top].node_id = node_id;
+		frames[stack_top].pos = pos;
+		frames[stack_top].node_type = n->type;
+		frames[stack_top].data = n->size > 0 ? sw_graph_get_data(sdf->g, n) : NULL;
+		frames[stack_top].dist_a = (kr_vec4_t){0.0f, 0.0f, 0.0f, INFINITY};
+		frames[stack_top++].dist_b = (kr_vec4_t){0.0f, 0.0f, 0.0f, INFINITY};
+		sw_sdf_compute_stack_frame_push(&frames[stack_top - 1]);
+		pos = frames[stack_top - 1].pos;
 	}
 
-	kr_free(stack);
+	if (stack == NULL) kr_free(frames);
 	return res;
 }
 
-float sw_sdf_compute(sw_sdf_t *sdf, kr_vec3_t pos) {
-	return sw_sdf_compute_color(sdf, pos).w;
+float sw_sdf_compute(sw_sdf_t *sdf, kr_vec3_t pos, sw_sdf_stack_frame_t *stack) {
+	return sw_sdf_compute_color(sdf, pos, stack).w;
 }
