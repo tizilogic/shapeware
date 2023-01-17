@@ -37,7 +37,7 @@ void sw_sdf_stack_destroy(sw_sdf_stack_frame_t *stack);
  * be allocated and subsequently freed for each call of this.
  * @return float
  */
-float sw_sdf_compute(sw_sdf_t *sdf, kr_vec3_t pos, sw_sdf_stack_frame_t *stack);
+float sw_sdf_compute(const sw_sdf_t *sdf, kr_vec3_t pos, sw_sdf_stack_frame_t *stack);
 
 /**
  * @brief Compute color and distance for a given position.
@@ -48,4 +48,4 @@ float sw_sdf_compute(sw_sdf_t *sdf, kr_vec3_t pos, sw_sdf_stack_frame_t *stack);
  * be allocated and subsequently freed for each call of this.
  * @return kr_vec4_t xyz = rgb, w = distance
  */
-kr_vec4_t sw_sdf_compute_color(sw_sdf_t *sdf, kr_vec3_t pos, sw_sdf_stack_frame_t *stack);
+kr_vec4_t sw_sdf_compute_color(const sw_sdf_t *sdf, kr_vec3_t pos, sw_sdf_stack_frame_t *stack);

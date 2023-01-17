@@ -168,7 +168,7 @@ static kr_vec4_t sw_sdf_compute_stack_frame_pop(sw_sdf_stack_frame_t *frame) {
 	return tmp_dist;
 }
 
-kr_vec4_t sw_sdf_compute_color(sw_sdf_t *sdf, kr_vec3_t pos, sw_sdf_stack_frame_t *stack) {
+kr_vec4_t sw_sdf_compute_color(const sw_sdf_t *sdf, kr_vec3_t pos, sw_sdf_stack_frame_t *stack) {
 	sw_sdf_stack_frame_t *frames = NULL;
 	if (stack == NULL) {
 		int stack_size = sdf->max_stack_depth + 1;
@@ -251,6 +251,6 @@ kr_vec4_t sw_sdf_compute_color(sw_sdf_t *sdf, kr_vec3_t pos, sw_sdf_stack_frame_
 	return res;
 }
 
-float sw_sdf_compute(sw_sdf_t *sdf, kr_vec3_t pos, sw_sdf_stack_frame_t *stack) {
+float sw_sdf_compute(const sw_sdf_t *sdf, kr_vec3_t pos, sw_sdf_stack_frame_t *stack) {
 	return sw_sdf_compute_color(sdf, pos, stack).w;
 }
