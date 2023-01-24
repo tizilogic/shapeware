@@ -24,7 +24,7 @@ void sw_sdf_destroy(sw_sdf_t *sdf);
  * @param sdf
  * @return sw_sdf_stack_frame_t*
  */
-sw_sdf_stack_frame_t *sw_sdf_stack_init(sw_sdf_t *sdf);
+sw_sdf_stack_frame_t *sw_sdf_stack_init(const sw_sdf_t *sdf);
 
 void sw_sdf_stack_destroy(sw_sdf_stack_frame_t *stack);
 

@@ -98,7 +98,7 @@ void sw_sdf_destroy(sw_sdf_t *sdf) {
 	kr_free(sdf);
 }
 
-sw_sdf_stack_frame_t *sw_sdf_stack_init(sw_sdf_t *sdf) {
+sw_sdf_stack_frame_t *sw_sdf_stack_init(const sw_sdf_t *sdf) {
 	// TODO: Verify that the additional frame is needed!
 	sw_sdf_stack_frame_t *stack = (sw_sdf_stack_frame_t *)kr_malloc((sdf->max_stack_depth + 1) *
 	                                                                sizeof(sw_sdf_stack_frame_t));
@@ -111,7 +111,8 @@ void sw_sdf_stack_destroy(sw_sdf_stack_frame_t *stack) {
 	kr_free(stack);
 }
 
-static kr_vec3_t sw_sdf_transform(sw_sdf_t *sdf, kr_vec3_t pos, int translation, int rotation) {
+static kr_vec3_t sw_sdf_transform(const sw_sdf_t *sdf, kr_vec3_t pos, int translation,
+                                  int rotation) {
 	if (rotation > -1) {
 		kr_vec3_t *r = sw_graph_get_data(sdf->g, sw_graph_get_node(sdf->g, rotation));
 		kr_matrix4x4_t m = kr_matrix4x4_identity();
