@@ -20,6 +20,15 @@ static void print_triangle(void *p, kr_vec3_t a, kr_vec3_t b, kr_vec3_t c) {
 	         a.y, a.z, b.x, b.y, b.z, c.x, c.y, c.z);
 }
 
+static void print_triangle_color(void *p, kr_vec3_t a, kr_vec3_t b, kr_vec3_t c, kr_vec3_t ca,
+                                 kr_vec3_t cb, kr_vec3_t cc) {
+	kinc_log(KINC_LOG_LEVEL_INFO,
+	         "Triangle (%5.3f, %5.3f, %5.3f), (%5.3f, %5.3f, %5.3f), (%5.3f, %5.3f, %5.3f) - Color "
+	         "(%5.3f, %5.3f, %5.3f), (%5.3f, %5.3f, %5.3f), (%5.3f, %5.3f, %5.3f)",
+	         a.x, a.y, a.z, b.x, b.y, b.z, c.x, c.y, c.z, ca.x, ca.y, ca.z, cb.x, cb.y, cb.z, cc.x,
+	         cc.y, cc.z);
+}
+
 int kickstart(int argc, char **argv) {
 	static uint8_t mem[1024 * 1024];
 	kr_init(&mem, 1024 * 1024, NULL, 0);
@@ -69,7 +78,13 @@ int kickstart(int argc, char **argv) {
 
 	sw_sdf_stack_destroy(stack);
 
-	sw_mc_process_sdf_chunk(sdf, &(sw_mc_chunk_t){.halfsidelen = 1.0f, .iso_level = 0.0f, .steps = 10}, print_triangle, NULL);
+	sw_mc_process_sdf_chunk(sdf,
+	                        &(sw_mc_chunk_t){.halfsidelen = 1.0f, .iso_level = 0.0f, .steps = 10},
+	                        print_triangle, NULL);
+
+	sw_mc_process_sdf_chunk_color(
+	    sdf, &(sw_mc_chunk_t){.halfsidelen = 1.0f, .iso_level = 0.0f, .steps = 10},
+	    print_triangle_color, NULL);
 
 	sw_sdf_destroy(sdf);
 
