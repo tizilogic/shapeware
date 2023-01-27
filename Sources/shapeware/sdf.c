@@ -120,7 +120,7 @@ static kr_vec3_t sw_sdf_transform(const sw_sdf_t *sdf, kr_vec3_t pos, int transl
 		m = kr_matrix4x4_multmat(&m, &rm);
 		if (translation > -1) {
 			kr_vec3_t *t = sw_graph_get_data(sdf->g, sw_graph_get_node(sdf->g, translation));
-			rm = kr_matrix4x4_translation(t->x, t->y, t->z);
+			rm = kr_matrix4x4_translation(-t->x, t->y, t->z);
 			m = kr_matrix4x4_multmat(&rm, &m);
 		}
 		m = kr_matrix4x4_inverse(&m);
@@ -132,7 +132,7 @@ static kr_vec3_t sw_sdf_transform(const sw_sdf_t *sdf, kr_vec3_t pos, int transl
 	}
 	else if (translation > -1) {
 		kr_vec3_t *t = sw_graph_get_data(sdf->g, sw_graph_get_node(sdf->g, translation));
-		pos = kr_vec3_subv(pos, *t);
+		pos = kr_vec3_subv(pos, (kr_vec3_t){-t->x, t->y, t->z});
 	}
 	return pos;
 }
