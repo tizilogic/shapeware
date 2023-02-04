@@ -40,20 +40,9 @@ static bool kr_vec3_lt(const kr_vec3_t left, const kr_vec3_t right) {
 
 static kr_vec3_t vertex_interpolate(float isolevel, kr_vec3_t p1, kr_vec3_t p2, float valp1,
                                     float valp2) {
-	if (kr_vec3_lt(p2, p1)) {
-		kr_vec3_t temp;
-		temp = p1;
-		p1 = p2;
-		p2 = temp;
-	}
-
-	kr_vec3_t p;
-	if (fabsf(valp1 - valp2) > 0.00001f)
-		p = kr_vec3_mult(kr_vec3_div(kr_vec3_addv(p1, kr_vec3_subv(p2, p1)), valp2 - valp1),
-		                 isolevel - valp1);
-	else
-		p = p1;
-	return p;
+	float t = (fabsf(valp2 - valp1) > 1e-5f) ? (isolevel - valp1) / (valp2 - valp1) : 0.5f;
+	t = fmaxf(fminf(t, 1.0f), 0.0f);
+	return kr_vec3_addv(p1, kr_vec3_mult(kr_vec3_subv(p2, p1), t));
 }
 
 /*
@@ -233,28 +222,25 @@ static void polygonise_color(gridcell_color_t grid, float isolevel,
 	}
 }
 
+static void set_cube_points(kr_vec3_t o, float s, kr_vec3_t *p) {
+	p[0] = (kr_vec3_t){o.x, o.y, o.z};
+	p[1] = (kr_vec3_t){o.x + s, o.y, o.z};
+	p[2] = (kr_vec3_t){o.x + s, o.y, o.z + s};
+	p[3] = (kr_vec3_t){o.x, o.y, o.z + s};
+	p[4] = (kr_vec3_t){o.x, o.y + s, o.z};
+	p[5] = (kr_vec3_t){o.x + s, o.y + s, o.z};
+	p[6] = (kr_vec3_t){o.x + s, o.y + s, o.z + s};
+	p[7] = (kr_vec3_t){o.x, o.y + s, o.z + s};
+}
+
 static void comp_gridcell(gridcell_t *c, sw_density_func_t f, void *p, kr_vec3_t o, float s) {
-	c->p[0] = (kr_vec3_t){o.x, o.y, o.z + s};
-	c->p[1] = (kr_vec3_t){o.x + s, o.y, o.z + s};
-	c->p[2] = (kr_vec3_t){o.x + s, o.y, o.z};
-	c->p[3] = (kr_vec3_t){o.x, o.y, o.z};
-	c->p[4] = (kr_vec3_t){o.x, o.y + s, o.z + s};
-	c->p[5] = (kr_vec3_t){o.x + s, o.y + s, o.z + s};
-	c->p[6] = (kr_vec3_t){o.x + s, o.y + s, o.z};
-	c->p[7] = (kr_vec3_t){o.x, o.y + s, o.z};
+	set_cube_points(o, s, c->p);
 	for (int i = 0; i < 8; ++i) c->val[i] = f(p, c->p[i]);
 }
 
 static void comp_gridcell_color(gridcell_color_t *c, sw_density_color_func_t f, void *p,
                                 kr_vec3_t o, float s) {
-	c->p[0] = (kr_vec3_t){o.x, o.y, o.z + s};
-	c->p[1] = (kr_vec3_t){o.x + s, o.y, o.z + s};
-	c->p[2] = (kr_vec3_t){o.x + s, o.y, o.z};
-	c->p[3] = (kr_vec3_t){o.x, o.y, o.z};
-	c->p[4] = (kr_vec3_t){o.x, o.y + s, o.z + s};
-	c->p[5] = (kr_vec3_t){o.x + s, o.y + s, o.z + s};
-	c->p[6] = (kr_vec3_t){o.x + s, o.y + s, o.z};
-	c->p[7] = (kr_vec3_t){o.x, o.y + s, o.z};
+	set_cube_points(o, s, c->p);
 	for (int i = 0; i < 8; ++i) c->val[i] = f(p, c->p[i]);
 }
 

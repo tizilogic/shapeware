@@ -4,7 +4,9 @@ project.addFile('Sources/**');
 project.addIncludeDir('Sources');
 if (typeof noKrinkPlease === 'undefined') {
     await project.addProject('krink');
+    project.addFile('Shaders/**');
     project.setDebugDir('Deployment');
+    project.addDefine('KINC_NO_WAYLAND');
 }
 else project.addExclude('Sources/dummy.c');
 
