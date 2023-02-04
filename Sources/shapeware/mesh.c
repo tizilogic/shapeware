@@ -9,6 +9,7 @@
 
 typedef struct sw_vertex {
 	kr_vec3_t pos;
+	kr_vec3_t normal;
 	kr_vec3_t color;
 	sw_list_int_t *tris;
 } sw_vertex_t;
@@ -28,9 +29,11 @@ typedef struct sw_mesh {
 	int vert_cap;
 	int next_tris;
 	int tris_cap;
+	sw_mesh_normal_func_t fn;
+	void *fparam;
 } sw_mesh_t;
 
-sw_mesh_t *sw_mesh_init(int reserve_vert, int reserve_tris) {
+sw_mesh_t *sw_mesh_init(int reserve_vert, int reserve_tris, sw_mesh_normal_func_t fn, void *fparam) {
 	sw_mesh_t *m = (sw_mesh_t *)kr_malloc(sizeof(sw_mesh_t));
 	assert(m != NULL);
 	reserve_vert = (reserve_vert > 0) ? reserve_vert : 16;
@@ -43,6 +46,8 @@ sw_mesh_t *sw_mesh_init(int reserve_vert, int reserve_tris) {
 	m->next_tris = 0;
 	m->tris_cap = reserve_tris;
 	assert(m->vertices != NULL && m->triangles != NULL && m->vert_id_map != NULL);
+	m->fn = fn;
+	m->fparam = fparam;
 	return m;
 }
 
@@ -84,6 +89,7 @@ static int sw_add_vertex(sw_mesh_t *m, kr_vec3_t pos, kr_vec3_t color, int trian
 	if (id == NULL) {
 		sw_resize_verts(m);
 		m->vertices[m->next_vert].pos = pos;
+		m->vertices[m->next_vert].normal = m->fn(m->fparam, pos);
 		m->vertices[m->next_vert].color = color;
 		m->vertices[m->next_vert].tris = sw_list_int_init(4);
 		sht_set(m->vert_id_map, &pos, sizeof(kr_vec3_t), &m->next_vert);
@@ -139,10 +145,16 @@ void sw_mesh_write_vert_buffer(sw_mesh_t *m, float *buffer) {
 		buffer[offset + 1] = m->vertices[i].pos.y;
 		buffer[offset + 2] = m->vertices[i].pos.z;
 
+		/*
+		// Could be used to compute normal by analyzing adjacent faces of a vertex
 		kr_vec3_t n = sw_smooth_vert_normal(m, i);
 		buffer[offset + 3] = n.x;
 		buffer[offset + 4] = n.y;
 		buffer[offset + 5] = n.z;
+		*/
+		buffer[offset + 3] = m->vertices[i].normal.x;
+		buffer[offset + 4] = m->vertices[i].normal.y;
+		buffer[offset + 5] = m->vertices[i].normal.z;
 
 		buffer[offset + 6] = m->vertices[i].color.x;
 		buffer[offset + 7] = m->vertices[i].color.y;

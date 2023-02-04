@@ -18,6 +18,7 @@
 #include <shapeware/graph.h>
 #include <shapeware/mc.h>
 #include <shapeware/mesh.h>
+#include <shapeware/raymarch.h>
 #include <shapeware/sdf.h>
 #include <shapeware/shapes.h>
 #include <shapeware/transform.h>
@@ -114,14 +115,26 @@ static void init_pipeline(void) {
 	mvp_mat = kinc_matrix4x4_multiply(&mvp_mat, &model_mat);
 }
 
+typedef struct sdf_normal_arg {
+	sw_sdf_t *sdf;
+	sw_sdf_stack_frame_t *stack;
+} sdf_normal_arg_t;
+
+static kr_vec3_t vertex_normal(void *param, kr_vec3_t pos) {
+	return sw_raymarch_surface_normal(((sdf_normal_arg_t *)param)->sdf,
+	                                  ((sdf_normal_arg_t *)param)->stack, pos);
+}
+
 static void sdf_to_buffer(const sw_sdf_t *sdf) {
-	sw_mesh_t *m = sw_mesh_init(1000, 1000);
+	sdf_normal_arg_t arg = (sdf_normal_arg_t){.sdf = sdf, .stack = sw_sdf_stack_init(sdf)};
+	sw_mesh_t *m = sw_mesh_init(1000, 1000, vertex_normal, &arg);
 	sw_mc_process_sdf_chunk_color(sdf,
 	                              &(sw_mc_chunk_t){.halfsidelen = 1.5f,
 	                                               .iso_level = 0.0f,
 	                                               .steps = 30,
 	                                               .origin = {.x = 0.0f, .y = 0.0f, .z = 0.0f}},
 	                              sw_mesh_add_triangle, m);
+	sw_sdf_stack_destroy(arg.stack);
 	kinc_g4_vertex_buffer_init(&vert_buff, sw_mesh_vert_count(m), &structure, KINC_G4_USAGE_STATIC,
 	                           0);
 	float *verts = kinc_g4_vertex_buffer_lock_all(&vert_buff);
@@ -155,7 +168,7 @@ static void update(void) {
 	kinc_g4_set_matrix4(model_loc, &model_mat);
 	kinc_g4_set_matrix4(view_loc, &view_mat);
 
-	kinc_g4_set_float3(light_loc, 1.8f, 0.5f, 0.5f);
+	kinc_g4_set_float3(light_loc, 1.8f, 0.5f, -1.5f);
 
 	kinc_g4_set_vertex_buffer(&vert_buff);
 	kinc_g4_set_index_buffer(&index_buff);
@@ -166,22 +179,30 @@ static void update(void) {
 }
 
 int kickstart(int argc, char **argv) {
-	static uint8_t mem[1024 * 1024];
-	kr_init(&mem, 1024 * 1024, NULL, 0);
+	static uint8_t mem[2 * 1024 * 1024];
+	kr_init(&mem, 2 * 1024 * 1024, NULL, 0);
 	sw_graph_t g;
 	sw_graph_init(&g, 8, 1024);
 	sw_shapes_sphere_t s1 = sw_shapes_default_sphere();
 	sw_shapes_sphere_t s2 = sw_shapes_default_sphere();
+	sw_shapes_ellipsoid_t s3 = sw_shapes_default_ellipsoid();
 	s1.m.r = 1.0f;
 	s1.m.g = 0.0f;
 	s1.m.b = 0.0f;
 	s2.m.r = 0.0f;
 	s2.m.g = 0.0f;
 	s2.m.b = 1.0f;
+	s3.r.x = 0.5f;
+	s3.r.y = 0.5f;
+	s3.r.z = 2.5f;
+	s3.m.r = 0.0f;
+	s3.m.g = 1.0f;
+	s3.m.b = 0.0f;
 	int s1_id =
 	    sw_graph_insert_node(&g, -1, SW_SHAPE_SPHERE, "Sphere 1", &s1, sizeof(sw_shapes_sphere_t));
 	int s2_id =
 	    sw_graph_insert_node(&g, -1, SW_SHAPE_SPHERE, "Sphere 2", &s2, sizeof(sw_shapes_sphere_t));
+	int s3_id = sw_graph_insert_node(&g, -1, SW_SHAPE_ELLIPSOID, "Ellipsoid 1", &s3, sizeof(sw_shapes_ellipsoid_t));
 
 	sw_transform_translation_t t1 = sw_transform_default_translation();
 	sw_transform_translation_t t2 = sw_transform_default_translation();
@@ -198,6 +219,18 @@ int kickstart(int argc, char **argv) {
 	                                      sizeof(sw_csg_smooth_t));
 	sw_graph_set_parent(&g, s1_id, smunion_id);
 	sw_graph_set_parent(&g, s2_id, smunion_id);
+
+	sw_csg_smooth_subtraction_t subtr = (sw_csg_smooth_subtraction_t){.subtractor_id = s3_id, .k = 0.05f};
+	int subtr_id = sw_graph_insert_node(&g, -1, SW_CSG_SMOOTH_SUBTRACTION, "Smooth Subtraction", &subtr,
+	                                    sizeof(sw_csg_smooth_subtraction_t));
+	sw_graph_set_parent(&g, s3_id, subtr_id);
+	sw_graph_set_parent(&g, smunion_id, subtr_id);
+
+	sw_shapes_box_frame_t s4 = sw_shapes_default_box_frame();
+	s4.b.x = 1.2f;
+	s4.b.y = 1.2f;
+	s4.b.z = 1.2f;
+	sw_graph_insert_node(&g, -1, SW_SHAPE_BOX_FRAME, "Box Frame", &s4, sizeof(s4));
 
 	sw_sdf_t *sdf = sw_sdf_generate(&g, -1);
 	kr_vec4_t d;
