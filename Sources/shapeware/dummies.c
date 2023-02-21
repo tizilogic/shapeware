@@ -10,7 +10,7 @@ sw_dummies_color_t sw_dummies_default_color(void) {
 	return (sw_dummies_color_t){.bgcolor = {.x = 0.02f, .y = 0.02f, .z = 0.02f}};
 }
 
-const float default_scaling_factor = 0.2f;
+#define DEFAULT_SCALING_FACTOR 0.2f
 
 const sw_dummies_spherical_harmonics_t sw_spherical_harmonics_presets[SW_SH_TOTAL] = {
     // Old Town Square
@@ -23,7 +23,7 @@ const sw_dummies_spherical_harmonics_t sw_spherical_harmonics_presets[SW_SH_TOTA
      .L20 = {.x = -0.03f, .y = -0.02f, .z = -0.02f},
      .L21 = {.x = -0.08f, .y = -0.09f, .z = -0.09f},
      .L22 = {.x = -0.16f, .y = -0.19f, .z = -0.22f},
-     .scaling_factor = default_scaling_factor},
+     .scaling_factor = DEFAULT_SCALING_FACTOR},
     // Grace Cathedral
     {.L00 = {.x = 0.79f, .y = 0.44f, .z = 0.54f},
      .L1m1 = {.x = 0.39f, .y = 0.35f, .z = 0.60f},
@@ -34,7 +34,7 @@ const sw_dummies_spherical_harmonics_t sw_spherical_harmonics_presets[SW_SH_TOTA
      .L20 = {.x = -0.16f, .y = -0.09f, .z = -0.15f},
      .L21 = {.x = 0.56f, .y = 0.21f, .z = 0.14f},
      .L22 = {.x = 0.21f, .y = -0.05f, .z = -0.30f},
-     .scaling_factor = default_scaling_factor},
+     .scaling_factor = DEFAULT_SCALING_FACTOR},
     // Eucalyptus Grove
     {.L00 = {.x = 0.38f, .y = 0.43f, .z = 0.45f},
      .L1m1 = {.x = 0.29f, .y = 0.36f, .z = 0.41f},
@@ -45,7 +45,7 @@ const sw_dummies_spherical_harmonics_t sw_spherical_harmonics_presets[SW_SH_TOTA
      .L20 = {.x = -0.09f, .y = -0.13f, .z = -0.15f},
      .L21 = {.x = -0.06f, .y = -0.05f, .z = -0.04f},
      .L22 = {.x = 0.02f, .y = 0.0f, .z = -0.05f},
-     .scaling_factor = default_scaling_factor},
+     .scaling_factor = DEFAULT_SCALING_FACTOR},
     // St. Peters Basilica
     {.L00 = {.x = 0.36f, .y = 0.26f, .z = 0.23f},
      .L1m1 = {.x = 0.18f, .y = 0.14f, .z = 0.13f},
@@ -56,7 +56,7 @@ const sw_dummies_spherical_harmonics_t sw_spherical_harmonics_presets[SW_SH_TOTA
      .L20 = {.x = -0.09f, .y = -0.08f, .z = -0.07f},
      .L21 = {.x = 0.01f, .y = 0.0f, .z = 0.0f},
      .L22 = {.x = -0.08f, .y = -0.03f, .z = 0.0f},
-     .scaling_factor = default_scaling_factor},
+     .scaling_factor = DEFAULT_SCALING_FACTOR},
     // Uffizi Gallery
     {.L00 = {.x = 0.32f, .y = 0.31f, .z = 0.35f},
      .L1m1 = {.x = 0.37f, .y = 0.37f, .z = 0.43f},
@@ -67,7 +67,7 @@ const sw_dummies_spherical_harmonics_t sw_spherical_harmonics_presets[SW_SH_TOTA
      .L20 = {.x = -0.28f, .y = -0.28f, .z = -0.32f},
      .L21 = {.x = 0.0f, .y = 0.0f, .z = 0.0f},
      .L22 = {.x = -0.24f, .y = -0.24f, .z = -0.28f},
-     .scaling_factor = default_scaling_factor},
+     .scaling_factor = DEFAULT_SCALING_FACTOR},
     // Gallileos Tomb
     {.L00 = {.x = 1.04f, .y = 0.76f, .z = 0.71f},
      .L1m1 = {.x = 0.44f, .y = 0.34f, .z = 0.34f},
@@ -78,7 +78,7 @@ const sw_dummies_spherical_harmonics_t sw_spherical_harmonics_presets[SW_SH_TOTA
      .L20 = {.x = -0.37f, .y = -0.28f, .z = -0.29f},
      .L21 = {.x = -0.17f, .y = -0.13f, .z = -0.13f},
      .L22 = {.x = 0.55f, .y = 0.42f, .z = 0.42f},
-     .scaling_factor = default_scaling_factor},
+     .scaling_factor = DEFAULT_SCALING_FACTOR},
     // Vine Street Kitchen
     {.L00 = {.x = 0.64f, .y = 0.67f, .z = 0.73f},
      .L1m1 = {.x = 0.28f, .y = 0.32f, .z = 0.33f},
@@ -89,7 +89,7 @@ const sw_dummies_spherical_harmonics_t sw_spherical_harmonics_presets[SW_SH_TOTA
      .L20 = {.x = 0.38f, .y = 0.54f, .z = 0.71f},
      .L21 = {.x = 0.06f, .y = 0.01f, .z = -0.02f},
      .L22 = {.x = -0.03f, .y = -0.02f, .z = -0.03f},
-     .scaling_factor = default_scaling_factor},
+     .scaling_factor = DEFAULT_SCALING_FACTOR},
     // Breezeway
     {.L00 = {.x = 0.32f, .y = 0.36f, .z = 0.38f},
      .L1m1 = {.x = 0.37f, .y = 0.41f, .z = 0.45f},
@@ -100,7 +100,7 @@ const sw_dummies_spherical_harmonics_t sw_spherical_harmonics_presets[SW_SH_TOTA
      .L20 = {.x = -0.07f, .y = -0.08f, .z = -0.09f},
      .L21 = {.x = 0.02f, .y = 0.03f, .z = 0.03f},
      .L22 = {.x = -0.29f, .y = -0.32f, .z = -0.36f},
-     .scaling_factor = default_scaling_factor},
+     .scaling_factor = DEFAULT_SCALING_FACTOR},
     // Campus Sunset
     {.L00 = {.x = 0.79f, .y = 0.94f, .z = 0.98f},
      .L1m1 = {.x = 0.44f, .y = 0.56f, .z = 0.70f},
@@ -111,7 +111,7 @@ const sw_dummies_spherical_harmonics_t sw_spherical_harmonics_presets[SW_SH_TOTA
      .L20 = {.x = -0.39f, .y = -0.40f, .z = -0.36f},
      .L21 = {.x = 0.09f, .y = 0.07f, .z = 0.04f},
      .L22 = {.x = 0.67f, .y = 0.67f, .z = 0.52f},
-     .scaling_factor = default_scaling_factor},
+     .scaling_factor = DEFAULT_SCALING_FACTOR},
     // Funston Beach Sunset
     {.L00 = {.x = 0.68f, .y = 0.69f, .z = 0.70f},
      .L1m1 = {.x = 0.32f, .y = 0.37f, .z = 0.44f},
@@ -122,7 +122,7 @@ const sw_dummies_spherical_harmonics_t sw_spherical_harmonics_presets[SW_SH_TOTA
      .L20 = {.x = -0.03f, .y = -0.02f, .z = -0.01f},
      .L21 = {.x = 0.16f, .y = 0.14f, .z = 0.10f},
      .L22 = {.x = 0.37f, .y = 0.31f, .z = 0.20f},
-     .scaling_factor = default_scaling_factor},
+     .scaling_factor = DEFAULT_SCALING_FACTOR},
 };
 
 const char *sw_spherical_harmonics_names[SW_SH_TOTAL] = {
