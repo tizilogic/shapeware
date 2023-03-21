@@ -143,13 +143,13 @@ static void sdf_to_buffer(const sw_sdf_t *sdf) {
 
 	kinc_g4_index_buffer_init(&index_buff, sw_mesh_tris_count(m) * 3,
 	                          KINC_G4_INDEX_BUFFER_FORMAT_32BIT, KINC_G4_USAGE_STATIC);
-	int *indices = kinc_g4_index_buffer_lock(&index_buff);
+	int *indices = kinc_g4_index_buffer_lock_all(&index_buff);
 	sw_mesh_write_index_buffer(m, indices);
-	kinc_g4_index_buffer_unlock(&index_buff);
+	kinc_g4_index_buffer_unlock_all(&index_buff);
 	sw_mesh_destroy(m);
 }
 
-static void update(void) {
+static void update(void *unused) {
 	kinc_g4_begin(0);
 	kinc_g4_clear(KINC_G4_CLEAR_COLOR | KINC_G4_CLEAR_DEPTH, 0xff111111, 1.0f, 0);
 
@@ -253,7 +253,7 @@ int kickstart(int argc, char **argv) {
 	    print_triangle_color, NULL);
 
 	kinc_init("Shapeware Demo", 1280, 720, NULL, NULL);
-	kinc_set_update_callback(update);
+	kinc_set_update_callback(update, NULL);
 	init_pipeline();
 	sdf_to_buffer(sdf);
 	sw_sdf_destroy(sdf);
