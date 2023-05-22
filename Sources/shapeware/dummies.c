@@ -151,3 +151,7 @@ sw_dummies_rm_and_lighting_t sw_dummies_default_rm_and_lighting(void) {
 	                                      .shininess = 10.5f,
 	                                      .light_dir = {.x = 0.0f, .y = 0.5f, .z = -0.5f}};
 }
+
+sw_dummies_mc_settings_t sw_dummies_default_mc_settings(void) {
+    return (sw_dummies_mc_settings_t){.cube_sidelen = 0.1f, .cubes_per_side = 10, .origin = {0}};
+}

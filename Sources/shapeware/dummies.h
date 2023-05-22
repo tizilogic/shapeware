@@ -1,5 +1,6 @@
 #pragma once
 
+#include "mc.h"
 #include "shared.h"
 #include <krink/math/vector.h>
 
@@ -8,6 +9,7 @@ typedef enum sw_dummies {
 	SW_DUMMIES_COLOR,
 	SW_DUMMIES_SPHERICAL_HARMONICS,
 	SW_DUMMIES_RM_AND_LIGHTING,
+	SW_DUMMIES_MC_SETTINGS,
 } sw_dummies_t;
 
 typedef struct sw_dummies_camera {
@@ -58,6 +60,12 @@ typedef struct sw_dummies_rm_and_lighting {
 	kr_vec3_t light_dir;
 } sw_dummies_rm_and_lighting_t;
 
+typedef struct sw_dummies_mc_settings {
+	float cube_sidelen;
+	float cubes_per_side;
+	kr_vec3_t origin;
+} sw_dummies_mc_settings_t;
+
 sw_dummies_camera_t sw_dummies_default_camera(void);
 sw_dummies_color_t sw_dummies_default_color(void);
 sw_dummies_spherical_harmonics_t sw_dummies_default_spherical_harmonics(void);
@@ -65,3 +73,4 @@ sw_dummies_spherical_harmonics_t
 sw_dummies_get_spherical_harmonics(sw_dummies_spherical_harmonics_presets_t p);
 const char *sw_dummies_get_spherical_harmonics_name(sw_dummies_spherical_harmonics_presets_t p);
 sw_dummies_rm_and_lighting_t sw_dummies_default_rm_and_lighting(void);
+sw_dummies_mc_settings_t sw_dummies_default_mc_settings(void);
