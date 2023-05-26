@@ -172,7 +172,6 @@ bool sw_graph_has_children(sw_graph_t *g, int id, sw_type_t *ignore, int ignore_
 }
 
 void sw_graph_deep_copy(sw_graph_t *target, const sw_graph_t *src) {
-	sw_graph_destroy(target);
 	sw_graph_init(target, src->node_cap, src->data_cap);
 	target->data_top = src->data_top;
 	target->size = src->size;
