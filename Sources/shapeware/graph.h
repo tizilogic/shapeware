@@ -42,6 +42,7 @@ void *sw_graph_get_data(sw_graph_t *g, sw_node_t *n);
 void sw_graph_set_parent(sw_graph_t *g, int id, int parent);
 sw_type_t sw_graph_type(sw_graph_t *g, int id);
 bool sw_graph_has_children(sw_graph_t *g, int id, sw_type_t *ignore, int ignore_size);
+void sw_graph_deep_copy(sw_graph_t *target, const sw_graph_t *src);
 
 // Iterating
 
