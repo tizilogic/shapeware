@@ -116,7 +116,7 @@ static void init_pipeline(void) {
 }
 
 typedef struct sdf_normal_arg {
-	sw_sdf_t *sdf;
+	const sw_sdf_t *sdf;
 	sw_sdf_stack_frame_t *stack;
 } sdf_normal_arg_t;
 

@@ -21,7 +21,7 @@ typedef struct sw_triangle {
 	kr_vec3_t face_normal_mag;
 } sw_triangle_t;
 
-typedef struct sw_mesh {
+struct sw_mesh {
 	sw_vertex_t *vertices;
 	sht_t *vert_id_map;
 	sw_triangle_t *triangles;
@@ -31,7 +31,7 @@ typedef struct sw_mesh {
 	int tris_cap;
 	sw_mesh_normal_func_t fn;
 	void *fparam;
-} sw_mesh_t;
+};
 
 sw_mesh_t *sw_mesh_init(int reserve_vert, int reserve_tris, sw_mesh_normal_func_t fn, void *fparam) {
 	sw_mesh_t *m = (sw_mesh_t *)kr_malloc(sizeof(sw_mesh_t));
@@ -101,8 +101,9 @@ static int sw_add_vertex(sw_mesh_t *m, kr_vec3_t pos, kr_vec3_t color, int trian
 	return ret;
 }
 
-void sw_mesh_add_triangle(sw_mesh_t *m, kr_vec3_t a, kr_vec3_t b, kr_vec3_t c, kr_vec3_t ca,
+void sw_mesh_add_triangle(void *param, kr_vec3_t a, kr_vec3_t b, kr_vec3_t c, kr_vec3_t ca,
                           kr_vec3_t cb, kr_vec3_t cc) {
+	sw_mesh_t *m = (sw_mesh_t *)param;
 	sw_resize_tris(m);
 	m->triangles[m->next_tris] =
 	    (sw_triangle_t){.va = sw_add_vertex(m, a, ca, m->next_tris),

@@ -9,4 +9,4 @@ kr_vec3_t sw_raymarch_ray_direction(kr_vec3_t origin, kr_vec3_t look_at, kr_vec2
 kr_vec3_t sw_raymarch_surface_pos(sw_sdf_t *sdf, sw_sdf_stack_frame_t *stack, kr_vec3_t origin,
                                   kr_vec3_t direction, int max_steps, float surf_dist,
                                   float max_dist, bool *hit);
-kr_vec3_t sw_raymarch_surface_normal(sw_sdf_t *sdf, sw_sdf_stack_frame_t *stack, kr_vec3_t pos);
+kr_vec3_t sw_raymarch_surface_normal(const sw_sdf_t *sdf, sw_sdf_stack_frame_t *stack, kr_vec3_t pos);

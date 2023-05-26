@@ -30,7 +30,7 @@ kr_vec3_t sw_raymarch_surface_pos(sw_sdf_t *sdf, sw_sdf_stack_frame_t *stack, kr
 	return (kr_vec3_t){0.0f};
 }
 
-kr_vec3_t sw_raymarch_surface_normal(sw_sdf_t *sdf, sw_sdf_stack_frame_t *stack, kr_vec3_t pos) {
+kr_vec3_t sw_raymarch_surface_normal(const sw_sdf_t *sdf, sw_sdf_stack_frame_t *stack, kr_vec3_t pos) {
 	const float h = 0.001f;
 	const kr_vec3_t xyy = (kr_vec3_t){.x = 1.0f, .y = -1.0f, .z = -1.0f};
 	const kr_vec3_t yyx = (kr_vec3_t){.x = -1.0f, .y = -1.0f, .z = 1.0f};
