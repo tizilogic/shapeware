@@ -153,5 +153,5 @@ sw_dummies_rm_and_lighting_t sw_dummies_default_rm_and_lighting(void) {
 }
 
 sw_dummies_mc_settings_t sw_dummies_default_mc_settings(void) {
-    return (sw_dummies_mc_settings_t){.cube_sidelen = 0.1f, .cubes_per_side = 10, .origin = {0}};
+    return (sw_dummies_mc_settings_t){.cube_sidelen = 2.0f, .cubes_per_side = 12, .origin = {0}};
 }
