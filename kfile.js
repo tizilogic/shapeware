@@ -1,5 +1,11 @@
 let project = new Project('shapeware');
 
+project.useAsLibrary = () => {
+	project.cmd = false;
+	project.debugDir = null;
+    project.addExclude('Sources/dummy.c');
+};
+
 project.addFile('Sources/**');
 project.addIncludeDir('Sources');
 if (typeof noKrinkPlease === 'undefined') {
@@ -8,7 +14,6 @@ if (typeof noKrinkPlease === 'undefined') {
     project.setDebugDir('Deployment');
     project.addDefine('KINC_NO_WAYLAND');
 }
-else project.addExclude('Sources/dummy.c');
 
 project.addFile('ext/sht/sht.c');
 project.addFile('ext/sht/murmur3.c');
