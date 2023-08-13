@@ -13,22 +13,22 @@
 #include <math.h>
 #include <util/list.h>
 
-typedef struct sw_sdf_stack_frame {
+struct sw_sdf_stack_frame {
 	int node_id;
 	kr_vec4_t dist_a;
 	kr_vec4_t dist_b;
 	sw_type_t node_type;
 	void *data;
 	kr_vec3_t pos;
-} sw_sdf_stack_frame_t;
+};
 
-typedef struct sw_sdf {
+struct sw_sdf {
 	sw_graph_t *g;
 	sw_list_int_t *nodes;
 	sw_list_int_t *stack_direction;
 	int empty_count;
 	int max_stack_depth;
-} sw_sdf_t;
+};
 
 static int sw_sdf_find_of_type(sw_graph_t *g, int parent, sw_type_t t) {
 	sw_iter_t it;
