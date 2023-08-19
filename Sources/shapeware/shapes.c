@@ -102,20 +102,26 @@ kr_vec4_t sw_shapes_evaluate_color(sw_type_t t, void *data, kr_vec3_t pos) {
 		distance = fmin(fmax(d.x, d.y), 0.0f) + kr_vec2_length(sw_vec2_maxf(d, 0.0f));
 	} break;
 	case SW_SHAPE_CAPPED_CONE: {
-#warning TODO: Fixme
+		// Used another method to compute the SDF, unsure why this works..
 		sw_shapes_capped_cone_t *s = (sw_shapes_capped_cone_t *)data;
 		color = &s->m;
-		kr_vec2_t q = (kr_vec2_t){kr_vec2_length((kr_vec2_t){pos.x, pos.z}), pos.y};
-		kr_vec2_t k1 = (kr_vec2_t){s->r2, s->h};
-		kr_vec2_t k2 = (kr_vec2_t){s->r2 - s->r1, 2.0f * s->h};
-		kr_vec2_t ca =
-		    (kr_vec2_t){q.x - fminf(q.x, (q.y < 0.0f) ? s->r1 : s->r2), fabsf(q.y) - s->h};
-		kr_vec2_t cb = kr_vec2_subv(
-		    q, kr_vec2_addv(k1, kr_vec2_mult(k2, sw_clampf(kr_vec2_dot(kr_vec2_subv(k1, q), k2) /
-		                                                       kr_vec2_dot(k2, k2),
-		                                                   0.0f, 1.0f))));
-		float ss = (cb.x < 0.0f && ca.y < 0.0f) ? -1.0f : 1.0f;
-		distance = ss * sqrtf(fminf(kr_vec2_dot(ca, ca), kr_vec2_dot(cb, cb)));
+		float ra = s->r2;
+		float rb = s->r1;
+		kr_vec3_t a = (kr_vec3_t){.x = 0, .y = s->h, .z = 0};
+		kr_vec3_t b = (kr_vec3_t){.x = 0, .y = -s->h, .z = 0};
+		float rba = rb - ra;
+		float baba = kr_vec3_dot(kr_vec3_subv(b, a), kr_vec3_subv(b, a));
+		float papa = kr_vec3_dot(kr_vec3_subv(pos, a), kr_vec3_subv(pos, a));
+		float paba = kr_vec3_dot(kr_vec3_subv(pos, a), kr_vec3_subv(b, a)) / baba;
+		float x = sqrtf(papa - paba * paba * baba);
+		float cax = fmaxf(0, x - ((paba < 0.5f) ? ra : rb));
+		float cay = fabsf(paba - 0.5f) - 0.5f;
+		float k = rba * rba + baba;
+		float f = sw_clampf((rba * (x - ra) + paba * baba) / k, 0, 1);
+		float cbx = x - ra - f * rba;
+		float cby = paba - f;
+		float ss = (cbx < 0.0 && cay < 0.0) ? -1.0 : 1.0;
+		distance = ss * sqrtf(fminf(cax * cax + cay * cay * baba, cbx * cbx + cby * cby * baba));
 	} break;
 	case SW_SHAPE_SOLID_ANGLE: {
 		sw_shapes_solid_angle_t *s = (sw_shapes_solid_angle_t *)data;
