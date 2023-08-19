@@ -46,9 +46,9 @@ kr_vec4_t sw_shapes_evaluate_color(sw_type_t t, void *data, kr_vec3_t pos) {
 		sw_shapes_capped_torus_t *s = (sw_shapes_capped_torus_t *)data;
 		color = &s->m;
 		pos.x = fabsf(pos.x);
-		float k = (s->t.y * pos.x > s->t.x * pos.y) ? kr_vec2_dot((kr_vec2_t){pos.x, pos.y}, s->t)
+		float k = (s->r.y * pos.x > s->r.x * pos.y) ? kr_vec2_dot((kr_vec2_t){pos.x, pos.y}, s->r)
 		                                            : kr_vec2_length((kr_vec2_t){pos.x, pos.y});
-		distance = sqrtf(kr_vec3_dot(pos, pos) + s->r.x * s->r.x - 2.0f * s->r.x * k) - s->r.y;
+		distance = sqrtf(kr_vec3_dot(pos, pos) + s->t.x * s->t.x - 2.0f * s->t.x * k) - s->t.y;
 	} break;
 	case SW_SHAPE_LINK: {
 		sw_shapes_link_t *s = (sw_shapes_link_t *)data;
@@ -98,10 +98,11 @@ kr_vec4_t sw_shapes_evaluate_color(sw_type_t t, void *data, kr_vec3_t pos) {
 		color = &s->m;
 		kr_vec2_t d =
 		    kr_vec2_subv(sw_vec2_abs((kr_vec2_t){kr_vec2_length((kr_vec2_t){pos.x, pos.z}), pos.y}),
-		                 (kr_vec2_t){s->h, s->r});
+		                 (kr_vec2_t){s->r, s->h});
 		distance = fmin(fmax(d.x, d.y), 0.0f) + kr_vec2_length(sw_vec2_maxf(d, 0.0f));
 	} break;
 	case SW_SHAPE_CAPPED_CONE: {
+#warning TODO: Fixme
 		sw_shapes_capped_cone_t *s = (sw_shapes_capped_cone_t *)data;
 		color = &s->m;
 		kr_vec2_t q = (kr_vec2_t){kr_vec2_length((kr_vec2_t){pos.x, pos.z}), pos.y};
